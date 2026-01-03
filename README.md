@@ -1,138 +1,101 @@
-# Pumilo - Quick Start Guide
+# Pumilo
 
-## Prerequisites
+A lightweight, React-based static site generator that bridges the gap between developer flexibility and content editor simplicity.
 
-- Bun installed (default location: `~/.bun/bin/bun`)
+## What is Pumilo?
+
+Pumilo lets developers write React templates with editable regions, then provides a visual editor for non-technical users to create and publish static pages. No complex CMS, no database, just pure static HTML published via Git.
+
+**Key Features:**
+- 🎨 Write templates in React with full TypeScript support
+- ✏️ Visual editor for content editing (no HTML knowledge required)
+- 📦 Zero runtime dependencies in published pages
+- 🚀 One-command publish to GitHub Pages
+- 🔄 Git-based workflow with full version control
+
+## Quick Start
+
+### Prerequisites
+
+- [Bun](https://bun.sh/) installed
 - Git
+- A target repository for your templates
 
-## Start Pumilo in 3 Steps
-
-### 1. Start the Backend
-
-**Option A: Use the startup script (recommended)**
+### 1. Install Dependencies
 
 ```bash
-cd /home/tomorrowdawn/project/pumilo
-./pumilo-dev.sh
+cd ~/project/pumilo
+bun install
 ```
 
-**Option B: Use bun directly**
+### 2. Start the Backend
 
 ```bash
-cd /home/tomorrowdawn/project/pumilo
-export PATH="$HOME/.bun/bin:$PATH"
 bun run dev:serve
 ```
 
-**Option C: Set custom bun path**
-
-```bash
-export BUN_PATH=/path/to/your/bun/bin
-./pumilo-dev.sh
-```
-
 This will:
-1. Build the web UI (`dist/webui/`)
-2. Start the backend server
+1. Build the web UI
+2. Start the backend server on `http://localhost:3000`
 
 You should see:
 ```
-Bundled 11 modules in 43ms
 🚀 Pumilo backend running on http://localhost:3000
    Editor: http://localhost:3000/editor
    Health: http://localhost:3000/healthz
 ```
 
-### 2. Open the Editor
+### 3. Open the Editor
 
-Open your browser and navigate to:
+Navigate to: `http://localhost:3000/editor`
 
-```
-http://localhost:3000/editor
-```
-
-### 3. Create Your First Page
+### 4. Create Your First Page
 
 In the editor:
-
-1. **Repo Path**: `/home/tomorrowdawn/project/pumilo-target-example`
-2. **Template Name**: `HelloTemplate`
-3. **Route**: `/hello-world` (or any route path)
+1. **Repo Path**: Path to your target repository (e.g., `~/project/my-site`)
+2. **Template Name**: Name of the template to use (e.g., `HelloTemplate`)
+3. **Route**: URL path for the page (e.g., `/hello-world`)
 4. Click **"Create/Load Page"**
 
 Now you can:
-- Edit the content in the TEXT field
+- Edit content in the editable fields
 - Click **"Save Changes"** to persist your edits
-- Click **"Publish & Preview"** to see the compiled HTML
+- Click **"Publish & Preview"** to generate static HTML
 
-## What You're Editing
+## Creating Templates
 
-When you create a page, Pumilo:
+### Template Structure
 
-1. Loads the template from `pumilo-target-example/pumilo-templates/HelloTemplate/template.tsx`
-2. Reads the schema from `schema.json` to create default data
-3. Renders the template in **edit mode** (TEXT → input field)
-4. Saves your data to `.pumilo/data/`
+Templates live in your target repository under `pumilo-templates/`:
 
-When you publish:
-
-1. Renders the template in **publish mode** (TEXT → HTML span)
-2. Generates static HTML
-3. Saves to `pumilo-target-example/dist/`
-4. Commits changes to git
-
-## Preview Published Pages
-
-After publishing, preview the GitHub Pages branch like it would appear when deployed:
-
-```bash
-./pumilo-preview.sh /home/tomorrowdawn/project/pumilo-target-example
+```
+my-site/
+├── pumilo-templates/
+│   └── HelloTemplate/
+│       ├── template.tsx
+│       └── schema.json
+└── dist/                    # Published HTML goes here
 ```
 
-Custom port:
+### Example Template
 
-```bash
-./pumilo-preview.sh /home/tomorrowdawn/project/pumilo-target-example 3000
-```
-
-Custom branch:
-
-```bash
-./pumilo-preview.sh /home/tomorrowdawn/project/pumilo-target-example 8080 gh-pages
-```
-
-The script will:
-1. Checkout to the specified branch (default: `gh-pages`)
-2. Start HTTP server at `http://localhost:8080`
-3. Restore your original branch when stopped (Ctrl+C)
-
-## Create Your Own Template
-
-1. Go to the target repo:
-
-```bash
-cd /home/tomorrowdawn/project/pumilo-target-example/pumilo-templates
-mkdir MyTemplate
-cd MyTemplate
-```
-
-2. Create `template.tsx`:
+**template.tsx:**
 
 ```tsx
 import type { FC } from "react";
 import { TEXT } from "@pumilo/sdk";
 
-const MyTemplate: FC = () => (
+const HelloTemplate: FC = () => (
   <div>
     <h1><TEXT id="title" placeholder="Enter title" /></h1>
     <p><TEXT id="description" placeholder="Enter description" /></p>
   </div>
 );
 
-export default MyTemplate;
+export default HelloTemplate;
 ```
 
-3. Create `schema.json`:
+**schema.json:**
 
 ```json
 {
@@ -141,18 +104,85 @@ export default MyTemplate;
   "properties": {
     "title": {
       "type": "string",
-      "default": "My Title"
+      "default": "Welcome"
     },
     "description": {
       "type": "string",
-      "default": "My Description"
+      "default": "This is my page"
     }
   },
   "required": ["title", "description"]
 }
 ```
 
-4. In the editor, use `MyTemplate` as the template name!
+## How It Works
+
+1. **Edit Mode**: `<TEXT>` components render as input fields in the editor
+2. **Publish Mode**: Same components render as static HTML
+3. **Git-Based Publishing**: Changes are committed to a `gh-pages` branch automatically
+4. **No Runtime**: Published pages are pure HTML with zero JavaScript overhead
+
+## Preview Published Pages
+
+Preview the GitHub Pages branch locally:
+
+```bash
+./pumilo-preview.sh <target-repo-path> [port] [branch]
+```
+
+Example:
+
+```bash
+./pumilo-preview.sh ~/project/my-site 8080 gh-pages
+```
+
+The script will:
+1. Checkout to the specified branch
+2. Start an HTTP server
+3. Restore your original branch when stopped (Ctrl+C)
+
+## Documentation
+
+- **[Implementation Guide](docs/implementation.md)** - Deep dive into Pumilo's architecture
+- **[Repository Management](docs/repo-management.md)** - Managing target repositories
+- **[Remote Repository Setup](docs/remote-repo.md)** - Working with remote Git repos
+
+## Development
+
+### Available Scripts
+
+```bash
+# Development mode (watch mode)
+bun run dev
+
+# Build and serve (for testing)
+bun run dev:serve
+
+# Build web UI only
+bun run build:webui
+
+# Start production server
+bun run start
+
+# Type check
+bun run typecheck
+
+# Preview published site
+bun run preview
+```
+
+### Project Structure
+
+```
+pumilo/
+├── src/
+│   ├── backend/        # Bun server, rendering engine
+│   ├── sdk/            # React components for templates
+│   └── webui/          # Visual editor interface
+├── docs/               # Documentation
+├── design/             # Design documents
+└── dist/               # Build output
+```
 
 ## Troubleshooting
 
@@ -164,27 +194,32 @@ lsof -ti:3000 | xargs kill -9
 
 ### Backend won't start
 
-Check the error in the terminal. Common issues:
-- Missing dependencies: `cd pumilo-target-example && bun install` (ensure bun is in PATH)
-- Git not initialized: `cd pumilo-target-example && git init`
+Common issues:
+- Missing dependencies: `bun install`
+- Git not initialized in target repo: `cd <target-repo> && git init`
 
 ### Can't see my changes
 
 Make sure to click "Save Changes" before "Publish & Preview"
 
-## Test Everything
+## Requirements
 
-Run the automated test:
+- **Bun**: >=1.0.0
+- **Git**: Any recent version
+- **Target Repository**: Must be a Git repository
 
-```bash
-/home/tomorrowdawn/project/pumilo/test-e2e.sh
-```
+## License
 
-All tests should pass with ✅
+See [LICENSE](LICENSE) file for details.
 
-## Next Steps
+## Contributing
 
-- Read `MILESTONE1.md` for complete documentation
-- Check `design/milstone1.md` for the original specification
-- Explore the code in `src/sdk/`, `src/backend/`, and `src/webui/`
+Pumilo is designed for simplicity and clarity. When contributing:
+- Follow the existing code style
+- Keep dependencies minimal
+- Document architectural decisions
+- Write tests for new features
 
+---
+
+Built with [Bun](https://bun.sh/) and [React](https://react.dev/)
